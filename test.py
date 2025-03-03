@@ -1,5 +1,6 @@
 import mysql.connector as conn
-db=conn.connect(host="localhost",user="root",password="<YOUR PASSWORD>")
+import pandas as pd
+db=conn.connect(host="localhost",user="root",password="teja")
 cur= db.cursor()
 
 # Creating database
@@ -36,6 +37,12 @@ except conn.errors.ProgrammingError as err:
     availability  INT DEFAULT 0
 );
 """)
+    
+column = [
+    "product_id", "name", "brand", "category", "price", "currency", "weight", "unit",
+    "ingredients", "allergens", "calories", "protein", "carbohydrates", "fats",
+    "sugar", "fiber", "sodium", "availability"
+]
 
 def inserting_ini_values():
     cur.fetchall()
@@ -107,10 +114,25 @@ def inserting_single_values(values:list):
             return err
     
 
+def search_with_productID(id:int):
+    print(f"The ID is:{id}")
+
+    try:
+        cur.execute(f"select * from products where product_id ={id}")
+        result=pd.DataFrame(cur.fetchall(),columns=column)
+        if(len(result)==0):
+            return f"There is no entry with ID {id}"
+        return result
+    
+    except conn.errors.IntegrityError as err:
+        return err
+
+
 product= [(
     16, "Protein Bar - Chocolate", "Fit Snacks", "Snacks", 2.99, "USD", 60, "g", 
     "Whey Protein, Cocoa, Almonds, Honey", "Dairy, Nuts", 220, 15, 20, 8, 10, 5, 80,23
 )]
 
-
 print(inserting_single_values(product))
+
+print(search_with_productID(12))
